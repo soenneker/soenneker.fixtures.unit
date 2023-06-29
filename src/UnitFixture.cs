@@ -20,16 +20,16 @@ public abstract class UnitFixture : IAsyncLifetime
 
     public UnitFixture()
     {
-        var injectableTestOutputSink = new InjectableTestOutputSink();
-
         // this needs to remain in constructor because of derivations
         Services = new ServiceCollection();
+
+        var injectableTestOutputSink = new InjectableTestOutputSink();
 
         Services.AddSingleton<IInjectableTestOutputSink>(injectableTestOutputSink);
 
         ILogger serilogLogger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
-            .WriteTo.Async(a => a.InjectableTestOutput(injectableTestOutputSink))
+            .WriteTo.InjectableTestOutput(injectableTestOutputSink)
             .Enrich.FromLogContext()
             .CreateLogger();
 

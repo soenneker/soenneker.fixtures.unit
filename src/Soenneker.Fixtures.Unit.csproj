@@ -40,8 +40,6 @@
 
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 
-        <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
-
         <PackageReference Include="Serilog.Sinks.XUnit.Injectable" Version="1.0.44" />
     </ItemGroup>
 </Project>
