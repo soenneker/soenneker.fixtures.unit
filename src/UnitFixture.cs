@@ -48,6 +48,6 @@ public abstract class UnitFixture : IAsyncLifetime
         GC.SuppressFinalize(this);
 
         if (ServiceProvider != null)
-            await ServiceProvider.DisposeAsync();
+            await ServiceProvider.DisposeAsync().ConfigureAwait(false);
     }
 }
