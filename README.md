@@ -8,5 +8,5 @@
 ## Installation
 
 ```
-Install-Package Soenneker.Fixtures.Unit
+dotnet add package Soenneker.Fixtures.Unit
 ```
