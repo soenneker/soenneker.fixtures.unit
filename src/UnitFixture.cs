@@ -1,25 +1,33 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Bogus;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Sinks.XUnit.Injectable;
 using Serilog.Sinks.XUnit.Injectable.Abstract;
 using Serilog.Sinks.XUnit.Injectable.Extensions;
-using Xunit;
+using Soenneker.Fixtures.Unit.Abstract;
+using Soenneker.Utils.AutoBogus;
+using Soenneker.Utils.AutoBogus.Config;
 
 namespace Soenneker.Fixtures.Unit;
 
-/// <summary>
-/// A base xUnit fixture providing injectable log output and DI mechanisms like IServiceCollection and ServiceProvider
-/// </summary>
-public abstract class UnitFixture : IAsyncLifetime
+///<inheritdoc cref="IUnitFixture"/>
+public abstract class UnitFixture : IUnitFixture
 {
     public ServiceProvider? ServiceProvider { get; set; }
 
-    protected IServiceCollection Services { get; set; }
+    public IServiceCollection Services { get; set; }
 
-    public UnitFixture()
+    public Faker Faker { get; }
+
+    public AutoFaker AutoFaker { get; }
+
+    public UnitFixture(AutoFakerConfig? autoFakerConfig = null)
     {
+        AutoFaker = new AutoFaker(autoFakerConfig);
+        Faker = AutoFaker.Faker;
+
         // this needs to remain in constructor because of derivations
         Services = new ServiceCollection();
 
@@ -42,7 +50,7 @@ public abstract class UnitFixture : IAsyncLifetime
 
         return Task.CompletedTask;
     }
-    
+
     public virtual async Task DisposeAsync()
     {
         GC.SuppressFinalize(this);

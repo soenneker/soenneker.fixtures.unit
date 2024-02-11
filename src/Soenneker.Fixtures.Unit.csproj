@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Description>A base xUnit fixture providing injectable log output and DI mechanisms like IServiceCollection and ServiceProvider</Description>
+        <Description>A base xUnit fixture providing injectable log output, DI mechanisms like IServiceCollection and ServiceProvider, and AutoFaker/Faker for generating test data.</Description>
         <Version Condition="'$(BUILD_VERSION)' == ''">2.1.0</Version>
         <Version Condition="'$(BUILD_VERSION)' != ''">$(BUILD_VERSION)</Version>
         <AssemblyName>Soenneker.Fixtures.Unit</AssemblyName>
@@ -37,9 +37,7 @@
         <None Include="..\LICENSE" Pack="true" PackagePath="\" />
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-
-        
-
         <PackageReference Include="Serilog.Sinks.XUnit.Injectable" Version="2.1.19" />
+        <PackageReference Include="Soenneker.Utils.AutoBogus" Version="2.1.87" />
     </ItemGroup>
 </Project>
