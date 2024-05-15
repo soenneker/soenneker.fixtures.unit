@@ -10,11 +10,23 @@ namespace Soenneker.Fixtures.Unit.Abstract;
 /// </summary>
 public interface IUnitFixture : IAsyncLifetime
 {
+    /// <summary>
+    /// Gets or sets the service provider used to resolve dependencies.
+    /// </summary>
     ServiceProvider? ServiceProvider { get; set; }
 
+    /// <summary>
+    /// Gets or sets the collection of service descriptors.
+    /// </summary>
     IServiceCollection Services { get; set; }
 
+    /// <summary>
+    /// Gets an instance of <see cref="Faker"/> used for generating fake data.
+    /// </summary>
     Faker Faker { get; }
 
+    /// <summary>
+    /// Gets an instance of <see cref="AutoFaker"/> used for generating auto-mocked fake data.
+    /// </summary>
     AutoFaker AutoFaker { get; }
 }
