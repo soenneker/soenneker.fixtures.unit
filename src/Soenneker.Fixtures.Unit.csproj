@@ -38,6 +38,6 @@
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
         <PackageReference Include="Serilog.Sinks.XUnit.Injectable" Version="3.0.58" />
-        <PackageReference Include="Soenneker.Utils.AutoBogus" Version="3.0.419" />
+        <PackageReference Include="Soenneker.Utils.AutoBogus" Version="3.0.420" />
     </ItemGroup>
 </Project>
