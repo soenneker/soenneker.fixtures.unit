@@ -44,14 +44,14 @@ public abstract class UnitFixture : IUnitFixture
         Log.Logger = serilogLogger;
     }
 
-    public virtual Task InitializeAsync()
+    public virtual ValueTask InitializeAsync()
     {
         ServiceProvider = Services.BuildServiceProvider();
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public virtual async Task DisposeAsync()
+    public virtual async ValueTask DisposeAsync()
     {
         GC.SuppressFinalize(this);
 
