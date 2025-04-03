@@ -35,11 +35,10 @@ public abstract class UnitFixture : IUnitFixture
 
         Services.AddSingleton<IInjectableTestOutputSink>(injectableTestOutputSink);
 
-        ILogger serilogLogger = new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .WriteTo.InjectableTestOutput(injectableTestOutputSink)
-            .Enrich.FromLogContext()
-            .CreateLogger();
+        ILogger serilogLogger = new LoggerConfiguration().MinimumLevel.Verbose()
+                                                         .WriteTo.InjectableTestOutput(injectableTestOutputSink)
+                                                         .Enrich.FromLogContext()
+                                                         .CreateLogger();
 
         Log.Logger = serilogLogger;
     }
