@@ -6,6 +6,7 @@ using Serilog;
 using Serilog.Sinks.XUnit.Injectable;
 using Serilog.Sinks.XUnit.Injectable.Abstract;
 using Serilog.Sinks.XUnit.Injectable.Extensions;
+using Soenneker.Extensions.ValueTask;
 using Soenneker.Fixtures.Unit.Abstract;
 using Soenneker.Utils.AutoBogus;
 using Soenneker.Utils.AutoBogus.Config;
@@ -54,10 +55,10 @@ public abstract class UnitFixture : IUnitFixture
     {
         GC.SuppressFinalize(this);
 
-        await Log.CloseAndFlushAsync().ConfigureAwait(false);
+        await Log.CloseAndFlushAsync().NoSync();
         Log.Logger = Serilog.Core.Logger.None;
 
         if (ServiceProvider != null)
-            await ServiceProvider.DisposeAsync().ConfigureAwait(false);
+            await ServiceProvider.DisposeAsync().NoSync();
     }
 }
