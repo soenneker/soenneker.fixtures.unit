@@ -24,8 +24,6 @@ public abstract class UnitFixture : IUnitFixture
 
     public AutoFaker AutoFaker { get; }
 
-    private readonly IInjectableTestOutputSink _injectableTestOutputSink;
-
     public UnitFixture(AutoFakerConfig? autoFakerConfig = null)
     {
         AutoFaker = new AutoFaker(autoFakerConfig);
@@ -34,16 +32,16 @@ public abstract class UnitFixture : IUnitFixture
         // this needs to remain in constructor because of derivations
         Services = new ServiceCollection();
 
-        _injectableTestOutputSink = new InjectableTestOutputSink();
+        var injectableTestOutputSink = new InjectableTestOutputSink();
 
-        Services.AddSingleton(_injectableTestOutputSink);
+        Services.AddSingleton<IInjectableTestOutputSink>(injectableTestOutputSink);
 
-        ILogger serilogLogger = new LoggerConfiguration().MinimumLevel.Verbose()
-                                                         .WriteTo.InjectableTestOutput(_injectableTestOutputSink)
-                                                         .Enrich.FromLogContext()
-                                                         .CreateLogger();
+        Log.Logger = new LoggerConfiguration().MinimumLevel.Verbose()
+            .WriteTo.InjectableTestOutput(injectableTestOutputSink)
+            .Enrich.FromLogContext()
+            .CreateLogger();
 
-        Log.Logger = serilogLogger;
+        // NOTE: The DI→Serilog bridge (AddLogging/AddSerilog) is done in the derived Fixture.
     }
 
     public virtual ValueTask InitializeAsync()
@@ -57,12 +55,14 @@ public abstract class UnitFixture : IUnitFixture
     {
         GC.SuppressFinalize(this);
 
-        await Log.CloseAndFlushAsync().NoSync();
+        await Log.CloseAndFlushAsync()
+            .NoSync();
         Log.Logger = Serilog.Core.Logger.None;
 
-        await _injectableTestOutputSink.DisposeAsync().NoSync();
+        // DO NOT dispose _injectableTestOutputSink here; DI will handle it.
 
         if (ServiceProvider is not null)
-            await ServiceProvider.DisposeAsync().NoSync();
+            await ServiceProvider.DisposeAsync()
+                .NoSync();
     }
 }
