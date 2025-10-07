@@ -14,14 +14,13 @@ using Soenneker.Utils.AutoBogus.Config;
 namespace Soenneker.Fixtures.Unit;
 
 ///<inheritdoc cref="IUnitFixture"/>
-public abstract class UnitFixture : IUnitFixture
+public abstract class UnitFixture : IUnitFixture, IAsyncDisposable
 {
+    private readonly InjectableTestOutputSink? _sink;
+
     public ServiceProvider? ServiceProvider { get; set; }
-
     public IServiceCollection Services { get; set; }
-
     public Faker Faker { get; }
-
     public AutoFaker AutoFaker { get; }
 
     public UnitFixture(AutoFakerConfig? autoFakerConfig = null)
@@ -29,25 +28,22 @@ public abstract class UnitFixture : IUnitFixture
         AutoFaker = new AutoFaker(autoFakerConfig);
         Faker = AutoFaker.Faker;
 
-        // this needs to remain in constructor because of derivations
+        Services = new ServiceCollection();
         Services = new ServiceCollection();
 
-        var injectableTestOutputSink = new InjectableTestOutputSink();
+        _sink = new InjectableTestOutputSink();
+        Services.AddSingleton<IInjectableTestOutputSink>(_sink);
 
-        Services.AddSingleton<IInjectableTestOutputSink>(injectableTestOutputSink);
-
-        Log.Logger = new LoggerConfiguration().MinimumLevel.Verbose()
-            .WriteTo.InjectableTestOutput(injectableTestOutputSink)
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+            .WriteTo.InjectableTestOutput(_sink)
             .Enrich.FromLogContext()
             .CreateLogger();
-
-        // NOTE: The DI→Serilog bridge (AddLogging/AddSerilog) is done in the derived Fixture.
     }
 
     public virtual ValueTask InitializeAsync()
     {
         ServiceProvider = Services.BuildServiceProvider();
-
         return ValueTask.CompletedTask;
     }
 
@@ -55,14 +51,15 @@ public abstract class UnitFixture : IUnitFixture
     {
         GC.SuppressFinalize(this);
 
-        await Log.CloseAndFlushAsync()
-            .NoSync();
+        // Flush Serilog first
+        await Log.CloseAndFlushAsync().NoSync();
         Log.Logger = Serilog.Core.Logger.None;
 
-        // DO NOT dispose _injectableTestOutputSink here; DI will handle it.
+        // Because we provided the instance, DI won't dispose it — we must
+        if (_sink != null)
+            await _sink.DisposeAsync();
 
         if (ServiceProvider is not null)
-            await ServiceProvider.DisposeAsync()
-                .NoSync();
+            await ServiceProvider.DisposeAsync().NoSync();
     }
 }
