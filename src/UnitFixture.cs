@@ -57,12 +57,11 @@ public abstract class UnitFixture : IUnitFixture
     {
         GC.SuppressFinalize(this);
 
-        await Log.CloseAndFlushAsync().NoSync();
-
-        Log.Logger = Serilog.Core.Logger.None;
-
-        // Ensure the injectable sink completes its background read loop
+        // Ensure the injectable sink completes its background read loop first
         await _injectableTestOutputSink.DisposeAsync().NoSync();
+
+        await Log.CloseAndFlushAsync().NoSync();
+        Log.Logger = Serilog.Core.Logger.None;
 
         if (ServiceProvider != null)
             await ServiceProvider.DisposeAsync().NoSync();
