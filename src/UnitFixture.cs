@@ -4,7 +4,6 @@ using Bogus;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Sinks.XUnit.Injectable;
-using Serilog.Sinks.XUnit.Injectable.Abstract;
 using Serilog.Sinks.XUnit.Injectable.Extensions;
 using Soenneker.Extensions.ValueTask;
 using Soenneker.Fixtures.Unit.Abstract;
@@ -16,8 +15,6 @@ namespace Soenneker.Fixtures.Unit;
 ///<inheritdoc cref="IUnitFixture"/>
 public abstract class UnitFixture : IUnitFixture
 {
-    private readonly IInjectableTestOutputSink _injectableTestOutputSink;
-
     public ServiceProvider? ServiceProvider { get; set; }
 
     public IServiceCollection Services { get; set; }
@@ -25,6 +22,8 @@ public abstract class UnitFixture : IUnitFixture
     public Faker Faker { get; }
 
     public AutoFaker AutoFaker { get; }
+
+    private readonly InjectableTestOutputSink _injectableTestOutputSink;
 
     public UnitFixture(AutoFakerConfig? autoFakerConfig = null)
     {
@@ -57,13 +56,12 @@ public abstract class UnitFixture : IUnitFixture
     {
         GC.SuppressFinalize(this);
 
-        // Ensure the injectable sink completes its background read loop first
-        await _injectableTestOutputSink.DisposeAsync().NoSync();
-
         await Log.CloseAndFlushAsync().NoSync();
         Log.Logger = Serilog.Core.Logger.None;
 
-        if (ServiceProvider != null)
+        await _injectableTestOutputSink.DisposeAsync().NoSync();
+
+        if (ServiceProvider is not null)
             await ServiceProvider.DisposeAsync().NoSync();
     }
 }
