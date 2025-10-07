@@ -16,6 +16,8 @@ namespace Soenneker.Fixtures.Unit;
 ///<inheritdoc cref="IUnitFixture"/>
 public abstract class UnitFixture : IUnitFixture
 {
+    private readonly IInjectableTestOutputSink _injectableTestOutputSink;
+
     public ServiceProvider? ServiceProvider { get; set; }
 
     public IServiceCollection Services { get; set; }
@@ -32,12 +34,12 @@ public abstract class UnitFixture : IUnitFixture
         // this needs to remain in constructor because of derivations
         Services = new ServiceCollection();
 
-        var injectableTestOutputSink = new InjectableTestOutputSink();
+        _injectableTestOutputSink = new InjectableTestOutputSink();
 
-        Services.AddSingleton<IInjectableTestOutputSink>(injectableTestOutputSink);
+        Services.AddSingleton(_injectableTestOutputSink);
 
         ILogger serilogLogger = new LoggerConfiguration().MinimumLevel.Verbose()
-                                                         .WriteTo.InjectableTestOutput(injectableTestOutputSink)
+                                                         .WriteTo.InjectableTestOutput(_injectableTestOutputSink)
                                                          .Enrich.FromLogContext()
                                                          .CreateLogger();
 
@@ -56,7 +58,11 @@ public abstract class UnitFixture : IUnitFixture
         GC.SuppressFinalize(this);
 
         await Log.CloseAndFlushAsync().NoSync();
+
         Log.Logger = Serilog.Core.Logger.None;
+
+        // Ensure the injectable sink completes its background read loop
+        await _injectableTestOutputSink.DisposeAsync().NoSync();
 
         if (ServiceProvider != null)
             await ServiceProvider.DisposeAsync().NoSync();
