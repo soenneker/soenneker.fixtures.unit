@@ -4,6 +4,7 @@ using Bogus;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Sinks.XUnit.Injectable;
+using Serilog.Sinks.XUnit.Injectable.Abstract;
 using Serilog.Sinks.XUnit.Injectable.Extensions;
 using Soenneker.Extensions.ValueTask;
 using Soenneker.Fixtures.Unit.Abstract;
@@ -23,7 +24,7 @@ public abstract class UnitFixture : IUnitFixture
 
     public AutoFaker AutoFaker { get; }
 
-    private readonly InjectableTestOutputSink _injectableTestOutputSink;
+    private readonly IInjectableTestOutputSink _injectableTestOutputSink;
 
     public UnitFixture(AutoFakerConfig? autoFakerConfig = null)
     {
