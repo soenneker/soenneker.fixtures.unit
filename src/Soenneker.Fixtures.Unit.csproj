@@ -14,7 +14,7 @@
         <AssemblyName>Soenneker.Fixtures.Unit</AssemblyName>
         <PackageId>Soenneker.Fixtures.Unit</PackageId>
         <PackageTags>xunit fixture unit c# .net dotnet unitfixture</PackageTags>
-        <Copyright>Copyright © 2023-2025 Jake Soenneker</Copyright>
+        <Copyright>Copyright © 2023-2026 Jake Soenneker</Copyright>
         <Authors>Jake Soenneker</Authors>
         <Company>https://soenneker.com</Company>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
