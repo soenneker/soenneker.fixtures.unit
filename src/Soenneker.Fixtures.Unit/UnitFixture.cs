@@ -29,7 +29,6 @@ public abstract class UnitFixture : IUnitFixture
         Faker = AutoFaker.Faker;
 
         Services = new ServiceCollection();
-        Services = new ServiceCollection();
 
         _sink = new InjectableTestOutputSink();
         Services.AddSingleton<IInjectableTestOutputSink>(_sink);
@@ -57,7 +56,7 @@ public abstract class UnitFixture : IUnitFixture
 
         // Because we provided the instance, DI won't dispose it — we must
         if (_sink != null)
-            await _sink.DisposeAsync();
+            await _sink.DisposeAsync().NoSync();
 
         if (ServiceProvider is not null)
             await ServiceProvider.DisposeAsync().NoSync();
