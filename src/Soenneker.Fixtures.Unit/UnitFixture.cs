@@ -40,12 +40,20 @@ public abstract class UnitFixture : IUnitFixture
             .CreateLogger();
     }
 
+    /// <summary>
+    /// Initializes async.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public virtual ValueTask InitializeAsync()
     {
         ServiceProvider = Services.BuildServiceProvider();
         return ValueTask.CompletedTask;
     }
 
+    /// <summary>
+    /// Asynchronously releases resources used by the current instance.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public virtual async ValueTask DisposeAsync()
     {
         GC.SuppressFinalize(this);
