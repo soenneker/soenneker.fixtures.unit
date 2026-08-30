@@ -5,7 +5,7 @@
 
 # Soenneker.Fixtures.Unit
 
-A base xUnit fixture providing injectable log output, DI mechanisms like IServiceCollection and ServiceProvider, and AutoFaker/Faker for generating test data.
+An extensible xUnit fixture that creates a dependency-injection container, configures injectable Serilog test output, and provides shared Bogus generators.
 
 ## Install
 
@@ -13,15 +13,68 @@ A base xUnit fixture providing injectable log output, DI mechanisms like IServic
 dotnet add package Soenneker.Fixtures.Unit
 ```
 
-## What you get
+## Usage
 
-- `IUnitFixture` — A base xUnit fixture providing injectable log output, DI mechanisms like IServiceCollection and ServiceProvider, and AutoFaker/Faker for generating test data.
+Create a fixture and register its services in the constructor. xUnit calls `InitializeAsync` after construction, which builds the provider from those registrations.
 
-## API at a glance
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using Soenneker.Fixtures.Unit;
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `IUnitFixture.ServiceProvider` | Gets or sets the service provider used to resolve dependencies. | Gets or sets the service provider used to resolve dependencies. |
-| `IUnitFixture.Services` | Gets or sets the collection of service descriptors. | Gets or sets the collection of service descriptors. |
-| `IUnitFixture.Faker` | Gets an instance of `Faker` used for generating fake data. | Gets an instance of `Faker` used for generating fake data. |
-| `IUnitFixture.AutoFaker` | Gets an instance of `AutoFaker` used for generating auto-mocked fake data. | Gets an instance of `AutoFaker` used for generating auto-mocked fake data. |
+public sealed class TestFixture : UnitFixture
+{
+    public TestFixture()
+    {
+        Services.AddSingleton<IClock, TestClock>();
+        Services.AddTransient<OrderService>();
+    }
+}
+```
+
+Share the fixture through an xUnit collection:
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using Xunit;
+
+[CollectionDefinition("unit")]
+public sealed class UnitCollection : ICollectionFixture<TestFixture>;
+
+[Collection("unit")]
+public sealed class OrderServiceTests
+{
+    private readonly TestFixture _fixture;
+
+    public OrderServiceTests(TestFixture fixture) => _fixture = fixture;
+
+    [Fact]
+    public void Creates_an_order()
+    {
+        OrderService service = _fixture.ServiceProvider!
+                                               .GetRequiredService<OrderService>();
+
+        string customerName = _fixture.Faker.Name.FullName();
+        Order request = _fixture.AutoFaker.Generate<Order>();
+
+        // exercise service
+    }
+}
+```
+
+The fixture also registers its `IInjectableTestOutputSink`. Inject the current `ITestOutputHelper` into that singleton when a test class is constructed if logs should appear in that test's output:
+
+```csharp
+using Serilog.Sinks.XUnit.Injectable.Abstract;
+using Xunit;
+
+IInjectableTestOutputSink sink = fixture.ServiceProvider!
+                                            .GetRequiredService<IInjectableTestOutputSink>();
+sink.Inject(testOutputHelper);
+```
+
+## Lifecycle and behavior
+
+- Add or replace registrations before `InitializeAsync` runs. Changing `Services` after the provider is built does not update `ServiceProvider`.
+- `Faker` is the Bogus generator owned by `AutoFaker`; use either property depending on whether a value or an entire object graph is needed.
+- The fixture owns the provider and injectable sink and disposes both during xUnit fixture teardown. Consumers should still dispose any scopes they create.
+- Construction assigns the process-wide `Serilog.Log.Logger`, and teardown flushes it. Use one shared fixture for a test collection or assembly; multiple fixture instances running in parallel can replace each other's global logger and route output to the wrong test.

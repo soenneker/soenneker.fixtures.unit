@@ -13,7 +13,6 @@ using Soenneker.Utils.AutoBogus.Config;
 
 namespace Soenneker.Fixtures.Unit;
 
-/// <inheritdoc cref="IUnitFixture"/>
 public abstract class UnitFixture : IUnitFixture
 {
     private readonly InjectableTestOutputSink? _sink;
@@ -23,6 +22,10 @@ public abstract class UnitFixture : IUnitFixture
     public Faker Faker { get; }
     public AutoFaker AutoFaker { get; }
 
+    /// <summary>
+    /// Creates a fixture with an optional AutoFaker configuration and a Serilog sink that can be bound to xUnit test output.
+    /// </summary>
+    /// <param name="autoFakerConfig">Configuration used by the shared <see cref="AutoFaker"/> instance.</param>
     public UnitFixture(AutoFakerConfig? autoFakerConfig = null)
     {
         AutoFaker = new AutoFaker(autoFakerConfig);
