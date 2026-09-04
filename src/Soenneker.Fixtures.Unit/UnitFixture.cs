@@ -13,6 +13,7 @@ using Soenneker.Utils.AutoBogus.Config;
 
 namespace Soenneker.Fixtures.Unit;
 
+/// <inheritdoc cref="IUnitFixture" />
 public abstract class UnitFixture : IUnitFixture
 {
     private readonly InjectableTestOutputSink? _sink;
