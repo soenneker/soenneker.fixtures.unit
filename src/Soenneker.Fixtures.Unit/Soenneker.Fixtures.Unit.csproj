@@ -44,7 +44,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
-        <PackageReference Include="Serilog.Sinks.XUnit.Injectable" Version="4.0.278" />
+        <PackageReference Include="Serilog.Sinks.XUnit.Injectable" Version="4.0.280" />
         <PackageReference Include="Soenneker.Utils.AutoBogus" Version="4.0.971" />
     </ItemGroup>
 </Project>
